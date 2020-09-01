@@ -1,31 +1,4 @@
-// class Plant{
-//   constructor(){
-//     this.water = 0;
-//     this.soil = 0;
-//     this.light = 0;
-//   }
-// }
-
-// const hydrate = (plant) => {
-//   return {
-//     ...plant,
-//     water : (plant.water || 0) + 1
-//   }
-// };
-
-// const feed = (plant) => {
-//   return {
-//     ...plant,
-//     soil : (plant.soil || 0) + 1
-//   }
-// };
-
-// const giveLight = (plant) => {
-//   return {
-//     ...plant,
-//     light : (plant.light || 0 ) + 1
-//   }
-// };
+const Daisy = { soil: 0, light: 0, water: 0 };
 
 const changePlantState = (plant, property) => {
   return {
@@ -33,27 +6,17 @@ const changePlantState = (plant, property) => {
     [property]: (plant[property] || 0) + 1
   }
 }
-const Daisy = { soil: 0, light: 0, water: 0 };
 
 const wateredDaisy = changePlantState(Daisy, "water");
+/* 
+Three parameter version
+const changeState = (state, prop, value) => ({
+  ...state,
+  [prop] : (state[prop] || 0) + value
+})
+ */
 
-// const changeState = (state, prop) => {
-//   return {
-//     ...state,
-//   [prop]: (state[prop] || 0) + 1
-//   }
-// }
-
-const Person = { speed: 0, power: 0, strength: 5000}
-
-
-// const changeState = (state, prop, prop2, value) => ({
-//   ...state,
-//   [prop] : (state[prop] || 0) + value,
-//   [prop2] : (state[prop2] || 0) + value
-// })
-
-
+// Curryed version
 const changeState = (prop) => {
   return (value) => {
     return (state) => ({
@@ -63,24 +26,52 @@ const changeState = (prop) => {
   }
 }
 
-const superPower = changeState("power")(5000)
-const superSpeed = changeState("speed")(5000)
+// Reference to line 24: if the property exists in our state then the value should stay the same (state[prop]), if it does not exist then CREATE it, and assign it a value of 0
+// prop = (state[Prop] || 0 ) + value 
+/* 
+Long form:
+const changeState = function(prop) {
+  return function(value) {
+    return function(state) { ({
+      ...state,
+      [prop] : (state[prop] || 0) + value
+    })
+  }
+} */
 
-const Noel = superPower(Person);
-const NoelFast = superSpeed(Noel);
+const storeState = () => {
+  let currentState = {};
+  return (stateChangeFunction) => {
+    const newState = stateChangeFunction(currentState);
+    currentState = {...newState};
+    return newState;
+  }
+}
+/* 
+This version is not encapsulated in that outer most function
+const storeState2 = (stateChangeFunction) => {
+  let currentState = {};
+  const newState = stateChangeFunction(currentState);
+    currentState = {...newState};
+    return newState;
+} */
+/* 
+const Person = { speed: 0, power: 0, strength: 0}
 
-// const Erich = changeState(Person, "speed", "power", -6000)
+const superPower = changeState("power")(5000);
+const superSpeed = changeState("speed")(5000);
+ */
 
-console.log(Noel);
-console.log(NoelFast);
-// console.log(Erich);
+let plant = { soil: 0, light: 0, water: 0 }
 
-// const shallowClone = (obj) => {
-//   return {
-//     ...obj
-//   }
-// }
-// const Clone = shallowClone(Person)
-// console.log(Clone);
-// console.log("Absolute equality ", Person === Clone);
-// console.log("Relative equality ", Person == Clone);
+// changeState() in on line 20
+const blueFood = changeState("soil")(5);
+const sunlight = changeState("light")(2);
+
+const stateControl = storeState();
+
+const blueFoodPlant = stateControl(blueFood);
+console.log("blueFoodPlant soil: " + blueFoodPlant.soil + " light:" + blueFoodPlant.light + "\n");
+
+const sunlightPlant = stateControl(sunlight);
+console.log("sunlightPlant soil: " + sunlightPlant.soil + " light: " + sunlightPlant.light + "\n");
